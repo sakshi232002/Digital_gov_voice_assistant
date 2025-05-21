@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Government White Paper Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        :root {
+            --primary-color: #043e77;
+            --secondary-color: #e3f2fd;
+            --accent-color: #1e88e5;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #212529;
+            --light-text: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 700px; /* Reduced from 900px to make content more centered */
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            flex: 1;
+            margin: 0 auto; /* Ensure center alignment */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeIn 1.5s ease;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .lead {
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .logo {
+            max-width: 120px;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-container {
+            height: 450px;
+            overflow-y: auto;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            -webkit-scrollbar-width: thin; /* for modern browsers */
+            scrollbar-width: thin; /* for WebKit-based browsers */
+            scrollbar-color: var(--primary-color) transparent;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .message {
+            padding: 0.8rem 1.2rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            max-width: 80%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .message:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 0.2rem;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .assistant-message {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-color);
+            border-bottom-left-radius: 0.2rem;
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .form-control {
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border: none;
+            box-shadow: none;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .mic-btn {
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+        }
+
+        .mic-btn:hover {
+            background-color: #032c55;
+        }
+
+        .mic-active {
+            color: #fff;
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #043e77 0%, #032c55 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #032c55 0%, #021b34 100%);
+            transform: translateY(-2px);
+        }
+
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .status {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            min-height: 1.5em;
+            text-align: center;
+        }
+
+        #loadingIndicator {
+            display: none;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 100%; /* Ensure card takes available width in container */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #032c55 100%);
+            color: white;
+            font-weight: bold;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .list-group-item {
+            padding: 1rem 1.5rem;
+            border-left: none;
+            border-right: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .list-group-item:first-child {
+            border-top: none;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-group-item:hover {
+            background-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .list-group-item::before {
+            content: "→ ";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatAround 15s infinite linear;
+        }
+
+        .shape1 {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 120px;
+            height: 120px;
+            background-color: var(--accent-color);
+            border-radius: 30%;
+            top: 60%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+
+        .shape3 {
+            width: 60px;
+            height: 60px;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            top: 80%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .speech-wave {
+            display: flex;
+            align-items: center;
+            height: 20px;
+            gap: 3px;
+            margin-right: 10px;
+            visibility: hidden;
+        }
+
+        .speech-wave.active {
+            visibility: visible;
+        }
+
+        .speech-wave span {
+            display: block;
+            width: 3px;
+            height: 100%;
+            background-color: white;
+            border-radius: 3px;
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        .speech-wave span:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .speech-wave span:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .speech-wave span:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+        
+        .fas.fa-landmark.logo {
+            font-size: 60px;
+            color: #043e77;
+        }
+        
+        .logo-svg {
+            width: 100px;
+            height: 60px;
+        }
+
+        /* Content wrapper to ensure center alignment */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Language selector styling */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .language-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .language-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .language-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            min-width: 150px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .language-dropdown.show {
+            display: block;
+        }
+        
+        .language-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .language-option:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .language-option.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .flag-icon {
+            width: 20px;
+            height: 15px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .audio-btn {
+            background-color: var(--secondary-color);
+            border: none;
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes floatAround {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(50px, 50px) rotate(90deg);
+            }
+            50% {
+                transform: translate(0, 100px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-50px, 50px) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                height: 5px;
+            }
+            50% {
+                height: 15px;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 1rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .chat-container {
+                height: 350px;
+            }
+            .message {
+                max-width: 90%;
+            }
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+    </div>
+    
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button id="currentLanguage" class="language-btn">
+            <img src="/api/placeholder/20/15" alt="English" class="flag-icon" id="currentFlag">
+            <span id="currentLangText">English</span>
+            <i class="fas fa-chevron-down ms-2"></i>
+        </button>
+        <div id="languageDropdown" class="language-dropdown">
+            <div class="language-option active" data-lang="en" data-voice="en-US">
+                <img src="/api/placeholder/20/15" alt="English" class="flag-icon">
+                English
+            </div>
+            <div class="language-option" data-lang="hi" data-voice="hi-IN">
+                <img src="/api/placeholder/20/15" alt="Hindi" class="flag-icon">
+                हिन्दी
+            </div>
+            <div class="language-option" data-lang="mr" data-voice="mr-IN">
+                <img src="/api/placeholder/20/15" alt="Marathi" class="flag-icon">
+                मराठी
+            </div>
+            <div class="language-option" data-lang="es" data-voice="es-ES">
+                <img src="/api/placeholder/20/15" alt="Spanish" class="flag-icon">
+                Español
+            </div>
+            <div class="language-option" data-lang="fr" data-voice="fr-FR">
+                <img src="/api/placeholder/20/15" alt="French" class="flag-icon">
+                Français
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="header animate__animated animate__fadeIn">
+            <svg class="logo-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 10 L110 30 L90 30 Z" fill="#043e77"/>
+                <circle cx="70" cy="40" r="8" fill="#043e77"/>
+                <circle cx="85" cy="35" r="8" fill="#043e77"/>
+                <circle cx="100" cy="30" r="8" fill="#043e77"/>
+                <circle cx="115" cy="35" r="8" fill="#043e77"/>
+                <circle cx="130" cy="40" r="8" fill="#043e77"/>
+                <path d="M70 50 L75 70 L65 70 Z" fill="#043e77"/>
+                <path d="M100 50 L105 70 L95 70 Z" fill="#043e77"/>
+                <path d="M130 50 L135 70 L125 70 Z" fill="#043e77"/>
+                <path d="M60 70 C60 85, 70 95, 85 100 L115 100 C130 95, 140 85, 140 70 Z" fill="#043e77"/>
+            </svg>
+            <h1 id="headerTitle">Government White Paper Assistant</h1>
+            <p class="lead" id="headerSubtitle">Ask questions about "A Blueprint for Modern Digital Government"</p>
+        </div>
+
+        <div class="card animate__animated animate__fadeInUp">
+            <div class="card-header">
+                <i class="fas fa-comments me-2"></i> <span id="interactiveAssistantText">Interactive Assistant</span>
+            </div>
+            <div class="card-body">
+                <div class="chat-container" id="chatContainer">
+                    <div class="message assistant-message animate__animated animate__fadeIn">
+                        <i class="fas fa-robot me-2"></i><span id="welcomeMessage">Hello! I'm here to help answer your questions about the "Blueprint for Modern Digital Government" white paper. What would you like to know?</span>
+                    </div>
+                </div>
+
+                <div class="status" id="status"></div>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="queryInput" placeholder="Ask a question..." />
+                    <button class="btn mic-btn" id="micButton" title="Speak your question">
+                        <div class="speech-wave" id="speechWave">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="btn btn-primary" id="submitButton">
+                        <span id="loadingIndicator" class="spinner-border" role="status" aria-hidden="true"></span>
+                        <span id="askButtonText">Ask</span>
+                    </button>
+                </div>
+                
+                <div class="audio-controls">
+                    <button class="audio-btn" id="playAudioBtn" title="Play audio">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="audio-btn" id="pauseAudioBtn" title="Pause audio">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                    <button class="audio-btn" id="stopAudioBtn" title="Stop audio">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card animate__animated animate__fadeInUp delayed-animation">
+            <div class="card-header">
+                <i class="fas fa-question-circle me-2"></i> <span id="exampleQuestionsText">Example Questions</span>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush" id="exampleQuestions">
+                    <li class="list-group-item" id="example1">What are the main goals of the digital government blueprint?</li>
+                    <li class="list-group-item" id="example2">How does the white paper address data sharing?</li>
+                    <li class="list-group-item" id="example3">What digital skills are needed according to the document?</li>
+                    <li class="list-group-item" id="example4">How does the blueprint approach digital inclusion?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="animate__animated animate__fadeIn footer-style">
+        <p id="footerText">© 2025 Government Digital Service | A Blueprint for Modern Digital Government</p>
+    </footer>
+
+    <style>
+        .footer-style {
+            animation-delay: 0.6s;
+        }
+    </style>
+
+    <script>
+        // DOM elements
+        const chatContainer = document.getElementById('chatContainer');
+        const queryInput = document.getElementById('queryInput');
+        const submitButton = document.getElementById('submitButton');
+        const micButton = document.getElementById('micButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const statusElement = document.getElementById('status');
+        const speechWave = document.getElementById('speechWave');
+        const currentLanguageBtn = document.getElementById('currentLanguage');
+        const languageDropdown = document.getElementById('languageDropdown');
+        const currentLangText = document.getElementById('currentLangText');
+        const currentFlag = document.getElementById('currentFlag');
+        const playAudioBtn = document.getElementById('playAudioBtn');
+        const pauseAudioBtn = document.getElementById('pauseAudioBtn');
+        const stopAudioBtn = document.getElementById('stopAudioBtn');
+        
+        // Language translations
+        const translations = {
+            en: {
+                headerTitle: "Government White Paper Assistant",
+                headerSubtitle: "Ask questions about \"A Blueprint for Modern Digital Government\"",
+                interactiveAssistantText: "Interactive Assistant",
+                welcomeMessage: "Hello! I'm here to help answer your questions about the \"Blueprint for Modern Digital Government\" white paper. What would you like to know?",
+                askButtonText: "Ask",
+                exampleQuestionsText: "Example Questions",
+                example1: "What are the main goals of the digital government blueprint?",
+                example2: "How does the white paper address data sharing?",
+                example3: "What digital skills are needed according to the document?",
+                example4: "How does the blueprint approach digital inclusion?",
+                footerText: "© 2025 Government Digital Service | A Blueprint for Modern Digital Government",
+                placeholder: "Ask a question...",
+                listening: "Listening...",
+                speechError: "Speech recognition error: ",
+                responseComplete: "Response complete",
+                error: "Error: "
+            },
+            hi: {
+                headerTitle: "सरकारी व्हाइट पेपर सहायक",
+                headerSubtitle: "\"आधुनिक डिजिटल सरकार के लिए एक ब्लूप्रिंट\" के बारे में प्रश्न पूछें",
+                interactiveAssistantText: "इंटरैक्टिव सहायक",
+                welcomeMessage: "नमस्ते! मैं \"आधुनिक डिजिटल सरकार के लिए एक ब्लूप्रिंट\" व्हाइट पेपर के बारे में आपके प्रश्नों का उत्तर देने में मदद करने के लिए यहां हूं। आप क्या जानना चाहेंगे?",
+                askButtonText: "पूछें",
+                exampleQuestionsText: "उदाहरण प्रश्न",
+                example1: "डिजिटल सरकार ब्लूप्रिंट के मुख्य लक्ष्य क्या हैं?",
+                example2: "व्हाइट पेपर डेटा साझाकरण से कैसे निपटता है?",
+                example3: "दस्तावेज के अनुसार किन डिजिटल कौशलों की आवश्यकता है?",
+                example4: "ब्लूप्रिंट डिजिटल समावेश का क्या दृष्टिकोण रखता है?",
+                footerText: "© 2025 सरकारी डिजिटल सेवा | आधुनिक डिजिटल सरकार के लिए एक ब्लूप्रिंट",
+                placeholder: "एक प्रश्न पूछें...",
+                listening: "सुन रहा है...",
+                speechError: "भाषण पहचान त्रुटि: ",
+                responseComplete: "प्रतिक्रिया पूरी",
+                error: "त्रुटि: "
+            },
+            mr: {
+                headerTitle: "सरकारी वाइट पेपर सहाय्यक",
+                headerSubtitle: "\"आधुनिक डिजिटल सरकारसाठी ब्ल्यूप्रिंट\" बद्दल प्रश्न विचारा",
+                interactiveAssistantText: "इंटरॅक्टिव्ह सहाय्यक",
+                welcomeMessage: "नमस्कार! मी \"आधुनिक डिजिटल सरकारसाठी ब्ल्यूप्रिंट\" वाइट पेपरबद्दलच्या तुमच्या प्रश्नांची उत्तरे देण्यास मदत करण्यासाठी येथे आहे. तुम्हाला काय जाणून घ्यायचे आहे?",
+                askButtonText: "विचारा",
+                exampleQuestionsText: "उदाहरण प्रश्न",
+                example1: "डिजिटल सरकारी ब्ल्यूप्रिंटची मुख्य उद्दिष्टे काय आहेत?",
+                example2: "वाइट पेपर डेटा शेअरिंगकडे कसे लक्ष देते?",
+                example3: "दस्तऐवजानुसार कोणत्या डिजिटल कौशल्यांची आवश्यकता आहे?",
+                example4: "ब्ल्यूप्रिंट डिजिटल समावेशाकडे कसा दृष्टिकोन ठेवतो?",
+                footerText: "© 2025 सरकारी डिजिटल सेवा | आधुनिक डिजिटल सरकारसाठी ब्ल्यूप्रिंट",
+                placeholder: "प्रश्न विचारा...",
+                listening: "ऐकत आहे...",
+                speechError: "स्पीच ओळख त्रुटी: ",
+                responseComplete: "प्रतिसाद पूर्ण",
+                error: "त्रुटी: "
+            },
+            es: {
+                headerTitle: "Asistente de Libro Blanco del Gobierno",
+                headerSubtitle: "Haga preguntas sobre \"Un Plan para el Gobierno Digital Moderno\"",
+                interactiveAssistantText: "Asistente Interactivo",
+                welcomeMessage: "¡Hola! Estoy aquí para ayudarte a responder tus preguntas sobre el libro blanco \"Un Plan para el Gobierno Digital Moderno\". ¿Qué te gustaría saber?",
+                askButtonText: "Preguntar",
+                exampleQuestionsText: "Preguntas de Ejemplo",
+                example1: "¿Cuáles son los principales objetivos del plan de gobierno digital?",
+                example2: "¿Cómo aborda el libro blanco el intercambio de datos?",
+                example3: "¿Qué habilidades digitales se necesitan según el documento?",
+                example4: "¿Cómo aborda el plan la inclusión digital?",
+                footerText: "© 2025 Servicio Digital del Gobierno | Un Plan para el Gobierno Digital Moderno",
+                placeholder: "Haz una pregunta...",
+                listening: "Escuchando...",
+                speechError: "Error de reconocimiento de voz: ",
+                responseComplete: "Respuesta completa",
+                error: "Error: "
+            },
+            fr: {
+                headerTitle: "Assistant de Livre Blanc Gouvernemental",
+                headerSubtitle: "Posez des questions sur \"Un Plan pour un Gouvernement Numérique Moderne\"",
+                interactiveAssistantText: "Assistant Interactif",
+                welcomeMessage: "Bonjour ! Je suis là pour vous aider à répondre à vos questions sur le livre blanc \"Un Plan pour un Gouvernement Numérique Moderne\". Que souhaitez-vous savoir ?",
+                askButtonText: "Demander",
+                exampleQuestionsText: "Questions d'exemple",
+                example1: "Quels sont les principaux objectifs du plan de gouvernement numérique ?",
+                example2: "Comment le livre blanc aborde-t-il le partage des données ?",
+                example3: "Quelles compétences numériques sont nécessaires selon le document ?",
+                example4: "Comment le plan aborde-t-il l'inclusion numérique ?",
+                footerText: "© 2025 Service Numérique du Gouvernement | Un Plan pour un Gouvernement Numérique Moderne",
+                placeholder: "Posez une question...",
+                listening: "En écoute...",
+                speechError: "Erreur de reconnaissance vocale: ",
+                responseComplete: "Réponse complète",
+                error: "Erreur: "
+            }
+        };
+        
+        // Current language
+        let currentLanguage = 'en';
+        
+        // Audio player
+        let audioPlayer = null;
+        
+        // Animation for new elements
+        function animateCSS(element, animation, prefix = 'animate__') {
+            // We create a Promise and return it
+            return new Promise((resolve, reject) => {
+                const animationName = `${prefix}${animation}`;
+                
+                element.classList.add(`${prefix}animated`, animationName);
+
+                // When the animation ends, we clean the classes and resolve the Promise
+                function handleAnimationEnd(event) {
+                    event.stopPropagation();
+                    element.classList.remove(`${prefix}animated`, animationName);
+                    resolve('Animation ended');
+                }
+
+                element.addEventListener('animationend', handleAnimationEnd, {once: true});
+            });
+        }
+
+        // Speech Recognition setup (browser native)
+        let recognition;
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US'; // Default language
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                micButton.classList.add('active');
+                speechWave.classList.add('active');
+                setStatus(translations[currentLanguage].listening);
+            };
+
+            recognition.onerror = (event) => {
+                setStatus(translations[currentLanguage].speechError + event.error);
+                micButton.classList.remove('active');
+                speechWave.classList.remove('active');
+            };
+
+            recognition.onend = () => {
+                micButton.classList.remove('active');
+                speechWave.classList.remove('active');
+                setStatus('');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                queryInput.value = transcript;
+                setStatus(translations[currentLanguage].speechError + transcript);
+                handleSubmit();
+            };
+        } else {
+            micButton.disabled = true;
+            setStatus('Speech recognition not supported in this browser.');
+        }
+
+        // Function to update language UI
+        function updateLanguage(lang) {
+            if (!translations[lang]) return;
+            
+            currentLanguage = lang;
+            
+            // Update UI elements
+            document.getElementById('headerTitle').textContent = translations[lang].headerTitle;
+            document.getElementById('headerSubtitle').textContent = translations[lang].headerSubtitle;
+            document.getElementById('interactiveAssistantText').textContent = translations[lang].interactiveAssistantText;
+            document.getElementById('askButtonText').textContent = translations[lang].askButtonText;
+            document.getElementById('exampleQuestionsText').textContent = translations[lang].exampleQuestionsText;
+            document.getElementById('example1').textContent = translations[lang].example1;
+            document.getElementById('example2').textContent = translations[lang].example2;
+            document.getElementById('example3').textContent = translations[lang].example3;
+            document.getElementById('example4').textContent = translations[lang].example4;
+            document.getElementById('footerText').textContent = translations[lang].footerText;
+            queryInput.placeholder = translations[lang].placeholder;
+            
+            // Update language button text
+            currentLangText.textContent = document.querySelector(`.language-option[data-lang="${lang}"]`).textContent.trim();
+            
+            // Update speech recognition language
+            if (recognition) {
+                const voiceLang = document.querySelector(`.language-option[data-lang="${lang}"]`).dataset.voice;
+                recognition.lang = voiceLang;
+            }
+            
+            // Close dropdown
+            languageDropdown.classList.remove('show');
+            
+            // Update active language in dropdown
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`.language-option[data-lang="${lang}"]`).classList.add('active');
+        }
+
+        // Language dropdown toggle
+        currentLanguageBtn.addEventListener('click', () => {
+            languageDropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!currentLanguageBtn.contains(e.target) && !languageDropdown.contains(e.target)) {
+                languageDropdown.classList.remove('show');
+            }
+        });
+        
+        // Language selection
+        document.querySelectorAll('.language-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const lang = option.dataset.lang;
+                updateLanguage(lang);
+            });
+        });
+
+        // Add event listeners
+        submitButton.addEventListener('click', handleSubmit);
+        queryInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+        micButton.addEventListener('click', () => {
+            if (recognition) recognition.start();
+        });
+
+        // Example questions click event
+        document.querySelectorAll('#exampleQuestions .list-group-item').forEach((item) => {
+            item.addEventListener('click', function () {
+                queryInput.value = this.textContent.replace('→ ', '');
+                animateCSS(queryInput, 'pulse');
+            });
+        });
+        
+        // Audio controls
+        playAudioBtn.addEventListener('click', () => {
+            if (audioPlayer) audioPlayer.play();
+        });
+        
+        pauseAudioBtn.addEventListener('click', () => {
+            if (audioPlayer) audioPlayer.pause();
+        });
+        
+        stopAudioBtn.addEventListener('click', () => {
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+            }
+        });
+
+        // Function to handle form submission
+        async function handleSubmit() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            // Add user message to chat
+            addMessage(query, 'user');
+
+            // Clear input
+            queryInput.value = '';
+
+            // Show loading indicator
+            loadingIndicator.style.display = 'inline-block';
+            submitButton.disabled = true;
+            micButton.disabled = true;
+
+            try {
+                // Send query to server with language parameter
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        query, 
+                        language: currentLanguage 
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Add assistant message to chat with typing effect
+                await addMessage(data.response, 'assistant', true);
+
+                // Play TTS audio if available
+                if (data.audio_url) {
+                    playAudio(data.audio_url);
+                }
+
+                // Set status
+                setStatus(translations[currentLanguage].responseComplete);
+            } catch (error) {
+                console.error('Error:', error);
+                setStatus(`${translations[currentLanguage].error} ${error.message}`);
+                addMessage('Sorry, I encountered an error processing your request.', 'assistant');
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                submitButton.disabled = false;
+                micButton.disabled = false;
+            }
+        }
+
+        // Function to add message to chat with optional typing effect
+        async function addMessage(text, sender, withTypingEffect = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'assistant') {
+                messageDiv.innerHTML = '<i class="fas fa-robot me-2"></i>';
+            } else {
+                messageDiv.innerHTML = '<i class="fas fa-user me-2"></i>';
+            }
+            
+            chatContainer.appendChild(messageDiv);
+
+            if (withTypingEffect && sender === 'assistant') {
+                const typingSpan = document.createElement('span');
+                typingSpan.className = 'typing-indicator';
+                messageDiv.appendChild(typingSpan);
+                
+                // Simulate typing effect
+                let i = 0;
+                const typingSpeed = 30; // ms per character
+                const typeText = async () => {
+                    if (i < text.length) {
+                        typingSpan.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(typeText, typingSpeed);
+                    } else {
+                        messageDiv.textContent = '';
+                        messageDiv.innerHTML = '<i class="fas fa-robot me-2"></i>' + text;
+                    }
+                };
+                
+                await typeText();
+            } else {
+                messageDiv.innerHTML += text;
+            }
+
+            // Apply animation
+            animateCSS(messageDiv, sender === 'user' ? 'slideInRight' : 'slideInLeft');
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        // Function to set status message
+        function setStatus(message) {
+            statusElement.textContent = message;
+
+            // Clear status after 5 seconds
+            setTimeout(() => {
+                if (statusElement.textContent === message) {
+                    statusElement.textContent = '';
+                }
+            }, 5000);
+        }
+
+        // Play audio from URL
+        function playAudio(url) {
+            // Stop any currently playing audio
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer = null;
+            }
+            
+            // Create new audio player
+            audioPlayer = new Audio(url);
+            audioPlayer.play();
+            
+            // Handle audio events
+            audioPlayer.onended = () => {
+                audioPlayer = null;
+            };
+        }
+
+        // Generate Text-to-Speech for a message
+        async function generateTTS(text, language) {
+            try {
+                const response = await fetch('/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text, 
+                        language: language 
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.audio_url) {
+                    playAudio(data.audio_url);
+                }
+            } catch (error) {
+                console.error('TTS Error:', error);
+            }
+        }
+
+        // Add subtle animation to the cards on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 300 + (index * 200));
+            });
+
+            // Focus on input after page load
+            setTimeout(() => {
+                queryInput.focus();
+            }, 1000);
+            
+            // Initialize language to English by default
+            updateLanguage('en');
+        });
+    </script>
+</body>
+</html>
